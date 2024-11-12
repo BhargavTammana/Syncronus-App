@@ -52,15 +52,15 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/auth" element={
-            // <AuthRoute>
+            <AuthRoute>
               <Auth/>
-            // </AuthRoute>
+            </AuthRoute>
             }/>
           <Route path="/profile" element={<Profile/>}/>
           <Route path="/chat" element={
-            // <PrivateRoute>
+            <PrivateRoute>
               <Chat/>
-            // </PrivateRoute> 
+            </PrivateRoute> 
           }/>
           <Route path="*" element={<Navigate to ="/auth"/>}/>
         </Routes>
