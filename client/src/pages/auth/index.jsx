@@ -63,8 +63,8 @@ const Auth = () => {
                 
             }
         }catch(err){
-            if(err.status===401){
-                console.log(err.message)
+            if(err.status==401){
+                console.log(err)
                 toast.error("Invalid password")
             }
             if(err.response && err.response.status===404){

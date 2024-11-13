@@ -2,7 +2,6 @@ import asyncHandler from 'express-async-handler'
 import jwt from 'jsonwebtoken'
 import User from '../models/UserModel.js'
 import { compare } from 'bcrypt';
-import { response } from 'express';
 import {renameSync,unlinkSync} from "fs"
 const maxAge= 3*24*60*60*1000;
 
@@ -42,7 +41,7 @@ export const login = asyncHandler(async(req,res,next)=>{
     const result = await compare(password,user.password)
     
     if(!result){
-        return res.status(401).send("Invalid email or password.")
+        return res.status(401).send("Invalid email or password")
     }
 
     res.cookie("jwt",createToken(email,user.id),{
