@@ -116,3 +116,12 @@ export const removeProfileImage = asyncHandler(async(req,res,next)=>{
     await user.save()
     res.status(200).send("Profile Image removed successfully")
 })
+
+export const logout = asyncHandler(async(req,res,next)=>{
+    res.cookie("jwt",{},{
+        maxAge:1,
+        secure:true,
+        sameSite:"None"
+    })
+    res.status(200).send("Logout successfully")
+})

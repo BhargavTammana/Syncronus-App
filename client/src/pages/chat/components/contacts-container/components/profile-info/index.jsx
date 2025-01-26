@@ -1,18 +1,28 @@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { getColor } from "@/lib/utils"
 import { useAppStore } from "@/store"
-import { HOST } from "@/utils/constants"
+import { HOST, LOGOUT_ROUTE } from "@/utils/constants"
 import { Avatar, AvatarImage } from "@radix-ui/react-avatar"
 import { FiEdit2 } from "react-icons/fi"
 import { useNavigate } from "react-router-dom"
 import {IoPowerSharp} from "react-icons/io5"
+import { apiClient } from "@/lib/api-client"
 
 const ProfileInfo = () => {
-  const {userInfo} = useAppStore()
+  const {userInfo,setUserInfo} = useAppStore()
   const navigate = useNavigate()
 
   const logout = async()=>{
+    try{
+      const res = await apiClient.post(LOGOUT_ROUTE,{},{withCredentials:true})
 
+      if(res.status===200){
+        navigate("/auth")
+        setUserInfo(null)
+      }
+    }catch(error){
+      console.log(error)
+    }
   }
   return (
     <div className="absolute bottom-0 h-16 flex items-center justify-between px-10 w-full bg-[#2a2b33]">
