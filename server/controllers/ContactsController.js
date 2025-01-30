@@ -1,6 +1,7 @@
-import User from "../models/UserModel"
+import expressAsyncHandler from "express-async-handler"
+import User from "../models/UserModel.js"
 
-export const searchContacts = asyncHandler(async(req,res,next)=>{
+export const searchContacts = expressAsyncHandler(async(req,res,next)=>{
     const {searchTerm} = request.body
 
     if(searchTerm === undefined || searchTerm === null){
