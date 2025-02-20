@@ -48,7 +48,7 @@ function App() {
     return <div>Loading...</div>
   }
   return (
-    <div>
+    <div className='bg-[#010e22]'>
       <BrowserRouter>
         <Routes>
           <Route path="/auth" element={

@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import authRoutes from './routes/AuthRoutes.js';
 import contactRoutes from './routes/ContactRoutes.js';
+import setupSocket from './socket.js';
 dotenv.config();
 
 const app=express();
@@ -34,6 +35,8 @@ app.use((err, req, res, next) => {
 const server=app.listen(port,()=>{
     console.log(`Server is running at http://localhost:${port}`)
 })
+
+setupSocket(server)
 
 mongoose.connect(databaseURL)
     .then(()=>
