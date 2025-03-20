@@ -1,30 +1,41 @@
-export const createChatSlice = (set,get)=>({
-    selectedChatType:undefined,
-    selectedChatData:undefined,
+export const createChatSlice = (set, get) => ({
+    selectedChatType: undefined,
+    selectedChatData: undefined,
     selectedChatMessages: [],
-    setSelectedChatType:(selectedChatType)=>set({selectedChatType}),
-    setSelectedChatData:(selectedChatData)=>set({selectedChatData}),
-    setSelectedChatMessages:(selectedChatMessages)=>set({selectedChatMessages}),
-    closeChat:()=>{
+    setSelectedChatType: (selectedChatType) => 
+        set((state) => {
+            if (state.selectedChatType === selectedChatType) return state;
+            return { selectedChatType };
+        }),
+    setSelectedChatData: (selectedChatData) =>
+        set((state) => {
+            if (state.selectedChatData?._id === selectedChatData?._id) return state;
+            return { selectedChatData };
+        }),
+    setSelectedChatMessages: (selectedChatMessages) =>
+        set((state) => {
+            if (JSON.stringify(state.selectedChatMessages) === JSON.stringify(selectedChatMessages)) return state;
+            return { selectedChatMessages };
+        }),
+    closeChat: () => {
         set({
-            selectedChatType:undefined,
-            selectedChatData:undefined,
+            selectedChatType: undefined,
+            selectedChatData: undefined,
             selectedChatMessages: []
-        })
+        });
     },
-    addMessage:(message)=>{
-        const selectedChatDataMessages = get().selectedChatMessages
-        const selectedChatType = get().selectedChatType
+    addMessage: (message) => {
+        const selectedChatDataMessages = get().selectedChatMessages;
+        const selectedChatType = get().selectedChatType;
 
-        set({
-            selectedChatMessages:[...selectedChatDataMessages, {
-                ...message,
-                recipient:
-                    selectedChatType === 'channel'?message.recipient:message.recipient._id,
-                sender:
-                    selectedChatType === 'channel'?message.sender:message.sender._id
-            }],
-            
-        })
+        const newMessage = {
+            ...message,
+            recipient: selectedChatType === 'channel' ? message.recipient : message.recipient._id,
+            sender: selectedChatType === 'channel' ? message.sender : message.sender._id
+        };
+
+        set((state) => ({
+            selectedChatMessages: [...state.selectedChatMessages, newMessage]
+        }));
     }
-})
+});
