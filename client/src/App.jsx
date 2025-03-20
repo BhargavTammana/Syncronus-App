@@ -49,7 +49,7 @@ function App() {
   }
   return (
     <div className='bg-[#010e22]'>
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_relativeSplatPath: true }}>
         <Routes>
           <Route path="/auth" element={
             <AuthRoute>
