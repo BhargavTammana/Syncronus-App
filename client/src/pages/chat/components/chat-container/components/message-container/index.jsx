@@ -14,31 +14,31 @@ const MessageContainer = () => {
 //     console.log("MessageContainer mounted or re-rendered");
 //     const getMessages = async () => {
 //       try {
-//         if (selectedChatData?._id && selectedChatType === "contact") {
+        
 //           console.log("Fetching messages for:", selectedChatData._id);
 //           const response = await apiClient.post(
 //             GET_ALL_MESSAGES_ROUTE,
 //             { id: selectedChatData._id },
 //             { withCredentials: true }
-//           );
-
+//           )
 //           if (response.data.messages) {
 //             console.log("Messages fetched:", response.data.messages);
 //             setSelectedChatMessages(response.data.messages);
 //           } else {
 //             console.warn("No messages found for this contact.");
 //           }
-//         }
+        
 //       } catch (error) {
 //         console.error("Error fetching messages:", error);
 //       }
-//     };
-
-//     console.log("useEffect triggered with dependencies:", selectedChatData?._id, selectedChatType);
-//     getMessages();
+//     }
+//       if(selectedChatData._id){
+//         if(selectedChatType ==="contact") getMessages();
+//       }
+    
 //   }, 
-//   // [selectedChatData, selectedChatType,selectedChatMessages]
-// ); // Ensure dependencies are correct
+//   [selectedChatData, selectedChatType,setSelectedChatMessages]
+// ); 
 
   useEffect(
     ()=>{
