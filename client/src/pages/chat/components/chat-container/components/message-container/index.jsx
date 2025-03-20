@@ -2,32 +2,43 @@ import { apiClient } from '@/lib/api-client'
 import { useAppStore } from '@/store'
 import { GET_ALL_MESSAGES_ROUTE} from '@/utils/constants'
 import moment from 'moment'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef} from 'react'
 
 const MessageContainer = () => {
-  const scrollRef = useRef()
+ 
   const {selectedChatType,selectedChatData,userInfo,selectedChatMessages,setSelectedChatMessages} = useAppStore()
 
+  const scrollRef = useRef()
 
+//   useEffect(() => {
+//     console.log("MessageContainer mounted or re-rendered");
+//     const getMessages = async () => {
+//       try {
+//         if (selectedChatData?._id && selectedChatType === "contact") {
+//           console.log("Fetching messages for:", selectedChatData._id);
+//           const response = await apiClient.post(
+//             GET_ALL_MESSAGES_ROUTE,
+//             { id: selectedChatData._id },
+//             { withCredentials: true }
+//           );
 
-  useEffect(()=>{
-    const getMessages = async()=>{
-      try{
-        const response = await apiClient.post(GET_ALL_MESSAGES_ROUTE, {id:selectedChatData._id},{withCredentials:true})
-        if(response.data.messages){
-          setSelectedChatMessages(response.data.messages)
-        }
-      }catch(error){
-        console.log({error})
-      }
-    }
+//           if (response.data.messages) {
+//             console.log("Messages fetched:", response.data.messages);
+//             setSelectedChatMessages(response.data.messages);
+//           } else {
+//             console.warn("No messages found for this contact.");
+//           }
+//         }
+//       } catch (error) {
+//         console.error("Error fetching messages:", error);
+//       }
+//     };
 
-    if(selectedChatData._id){
-      if(selectedChatType === "contact") getMessages()
-    }
-  },[selectedChatData,selectedChatType,selectedChatMessages])
-
-
+//     console.log("useEffect triggered with dependencies:", selectedChatData?._id, selectedChatType);
+//     getMessages();
+//   }, 
+//   // [selectedChatData, selectedChatType,selectedChatMessages]
+// ); // Ensure dependencies are correct
 
   useEffect(
     ()=>{
@@ -36,6 +47,8 @@ const MessageContainer = () => {
       }
     },[selectedChatMessages]
   )
+
+  
   const renderMessages=()=>{
     let lastDate = null
     return selectedChatMessages.map((message,index)=>{
@@ -45,7 +58,7 @@ const MessageContainer = () => {
       return(
               <div key={index}>
             {showDate&&(
-              <div className="text-center text-gray-500" my-2>
+              <div className="text-center text-gray-500 my-2">
                 {moment(message.timeStamp).format("LL")}
               </div>
             )}
@@ -84,4 +97,4 @@ const MessageContainer = () => {
   )
 }
 
-export default MessageContainer
+export default React.memo(MessageContainer)
