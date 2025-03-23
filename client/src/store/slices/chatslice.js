@@ -2,6 +2,7 @@ export const createChatSlice = (set, get) => ({
     selectedChatType: undefined,
     selectedChatData: undefined,
     selectedChatMessages: [],
+    directMessagesContacts :[],
     setSelectedChatType: (selectedChatType) => 
         set((state) => {
             if (state.selectedChatType === selectedChatType) return state;
@@ -17,6 +18,10 @@ export const createChatSlice = (set, get) => ({
             if (JSON.stringify(state.selectedChatMessages) === JSON.stringify(selectedChatMessages)) return state;
             return { selectedChatMessages };
         }),
+    setDirectMessagesContacts : (directMessagesContacts)=>set((state)=>{
+        if(JSON.stringify(state.directMessagesContacts)===JSON.stringify(directMessagesContacts)) return state;
+        return {directMessagesContacts};
+    }),
     closeChat: () => {
         set({
             selectedChatType: undefined,
