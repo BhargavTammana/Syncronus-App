@@ -8,6 +8,7 @@ import { useAppStore } from './store'
 import { useEffect } from'react'
 import { apiClient } from './lib/api-client'
 import { GET_USER_INFO } from './utils/constants'
+import './App.css'
 function App() {
   const PrivateRoute = ({children})=>{
     const {userInfo}=useAppStore()
