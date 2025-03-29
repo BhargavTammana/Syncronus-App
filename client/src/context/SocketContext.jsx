@@ -11,13 +11,26 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     if (userInfo) {
-      socket.current = io(HOST, {
-        withCredentials: true,
-        query: { userId: userInfo.id },
-      });
+      if (!socket.current) {
+        socket.current = io(HOST, {
+          withCredentials: true,
+          query: { userId: userInfo.id },
+          reconnection: true,
+          reconnectionAttempts: 5,
+          reconnectionDelay: 1000,
+        });
+      }
 
       socket.current.on("connect", () => {
-        console.log("Connected to socket server");
+        console.log("Socket connected successfully");
+      });
+
+      socket.current.on("connect_error", (error) => {
+        console.log("Socket connection error:", error);
+      });
+
+      socket.current.on("disconnect", (reason) => {
+        console.log("Socket disconnected:", reason);
       });
 
       const handleReceiveMessage = (message) => {
@@ -30,13 +43,36 @@ export const SocketProvider = ({ children }) => {
         }
       };
 
-      socket.current.on("receiveMessage", handleReceiveMessage);
+      const handleReceiveChannelMessage = (message)=>{
+        console.log("SocketContext: Received channel message", message);
+        console.log("Current chat type:", selectedChatType);
+        console.log("Current chat data:", selectedChatData);
+        console.log("Message channelId:", message.channelId);
+        if(selectedChatType === "channel" && selectedChatData._id === message.channelId){
+          console.log("Adding message to state");
+          addMessage(message);
+        } else {
+          console.log("Message not added because:", {
+            selectedChatType,
+            selectedChatId: selectedChatData?._id,
+            messageChannelId: message.channelId
+          });
+        }
+      }
 
+      socket.current.on("receiveMessage", handleReceiveMessage);
+      socket.current.on("receive-channel-message",handleReceiveChannelMessage)
       return () => {
-        socket.current.disconnect();
+        if (socket.current) {
+          socket.current.off("connect");
+          socket.current.off("connect_error");
+          socket.current.off("disconnect");
+          socket.current.off("receiveMessage");
+          socket.current.off("receive-channel-message");
+        }
       };
     }
-  }, [userInfo, selectedChatData, selectedChatType, addMessage]);
+  }, [userInfo]);
 
   return <SocketContext.Provider value={socket.current}>{children}</SocketContext.Provider>;
 };

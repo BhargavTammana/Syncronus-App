@@ -1,6 +1,6 @@
 import {Server as SocketIoServer} from "socket.io"
 import Message from "./models/MessagesModel.js"
-
+import Channel from "./models/ChannelModel.js"
 const setupSocket = (server)=>{
     const io = new SocketIoServer(server,{
         cors:{
@@ -53,6 +53,61 @@ const setupSocket = (server)=>{
             console.error("Error sending message:", error);
         }
     }
+
+
+    const sendChannelMessage = async(message)=>{
+        try {
+            console.log("1. Received channel message:", message);
+            const {channelId, sender, content, messageType, fileUrl} = message
+            
+            console.log("2. Creating message with:", { sender, content, messageType });
+            const createdMessage = await Message.create({
+                sender,
+                recipient: null,
+                content,
+                messageType,
+                fileUrl,
+                timeStamp: new Date()
+            })
+            console.log("3. Created message:", createdMessage);
+
+            const messageData = await Message.findById(createdMessage._id)
+                .populate("sender", "id email firstName lastName image color")
+                .exec()
+            console.log("4. Populated message data:", messageData);
+
+            const channel = await Channel.findById(channelId)
+                .populate("members")
+            console.log("5. Found channel:", channel);
+            
+            const finalData = {...messageData._doc, channelId: channel._id}
+            console.log("6. Final data to send:", finalData);
+
+            await Channel.findByIdAndUpdate(channelId, {$push: {messages: createdMessage._id}})
+
+            if(channel && channel.members){
+                channel.members.forEach(member=>{
+                    const memberSocketId = userSocketMap.get(member.id.toString())
+                    console.log("Member ID:", member.id, "Socket ID:", memberSocketId);
+                    if(memberSocketId){
+                        io.to(memberSocketId).emit("receive-channel-message",finalData)
+                    }
+                })
+                const adminSocketId = userSocketMap.get(channel.admin)
+                console.log("Admin ID:", channel.admin, "Socket ID:", adminSocketId);
+                if(adminSocketId){
+                    io.to(adminSocketId).emit("receive-channel-message",finalData)
+                }
+            }
+        
+            
+            
+            
+        } catch (error) {
+            console.log("Error in sendChannelMessage:", error.message, error.stack)
+        }
+    }
+
     io.on("connection",(socket)=>{
         const userId = socket.handshake.query.userId
 
@@ -63,6 +118,7 @@ const setupSocket = (server)=>{
             console.log("User ID not provided during connection")
         }
         socket.on("sendMessage",sendMessage)
+        socket.on("send-channel-message",sendChannelMessage)
         socket.on("disconnect",()=>disconnect(socket))
     })
 }

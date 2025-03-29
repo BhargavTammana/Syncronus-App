@@ -12,7 +12,7 @@ const MessageBar = () => {
     const emojiRef = useRef()
     const fileInputRef = useRef()
     const socket = useSocket()
-    const {selectedChatType,selectedChatData,userInfo}=useAppStore()
+    const {selectedChatType,selectedChatData,userInfo,setIsUploading,setIsDownloading,setFileUploadProgress,setFileDownloadProgress}=useAppStore()
     const [emojiPickerOpen,setEmojiPickerOpen] = useState(false)
     const [message, setMessage] = useState("")
 
@@ -34,7 +34,14 @@ const MessageBar = () => {
     }
     
     const handleSendMessage = async()=>{
-        if(message.trim() === "") return; // Don't send empty messages
+        if(message.trim() === "") return;
+        
+        if(!socket?.connected) {
+            console.log("Socket not connected, attempting to reconnect...");
+            socket?.connect();
+            return;
+        }
+
         if(selectedChatType === 'contact'){
             socket.emit("sendMessage",{
                 sender:userInfo.id,
@@ -44,6 +51,27 @@ const MessageBar = () => {
                 fileUrl:undefined
             })
             setMessage(""); // Clear the message input after sending
+        }
+        else if(selectedChatType === "channel"){
+            const messageData = {
+                sender: userInfo.id,
+                content: message,
+                messageType: "text",
+                fileUrl: undefined,
+                channelId: selectedChatData._id
+            };
+            console.log("MessageBar: About to emit channel message");
+            console.log("MessageBar: Socket connected status:", socket.connected);
+            console.log("MessageBar: Message data:", messageData);
+            
+            socket.emit("send-channel-message", messageData, (error, acknowledgement) => {
+                if (error) {
+                    console.error("MessageBar: Error sending message:", error);
+                } else {
+                    console.log("MessageBar: Message successfully sent:", acknowledgement);
+                }
+            });
+            setMessage("");
         }
     }
 
@@ -66,8 +94,13 @@ const MessageBar = () => {
             if(file){
                 const formData = new FormData()
                 formData.append("file",file)
-                const response = await apiClient.post(UPLOAD_FILE_ROUTE,formData,{withCredentials: true})
+                setIsUploading(true)
+                
+                const response = await apiClient.post(UPLOAD_FILE_ROUTE,formData,{withCredentials: true,onUploadProgress:(progressEvent)=>{
+                    setFileUploadProgress(Math.round((progressEvent.loaded*100)/progressEvent.total))
+                }})
                 if(response.status === 200 && response.data){
+                    setIsUploading(false)
                     if(selectedChatType==="contact"){
                         socket.emit("sendMessage",{
                             sender:userInfo.id,
@@ -77,9 +110,19 @@ const MessageBar = () => {
                             fileUrl:response.data.filePath
                         })
                     }  
+                    else if(selectedChatType==="channel"){
+                        socket.emit("send-channel-message",{
+                            sender:userInfo.id,
+                            content:undefined,
+                            messageType:"file",
+                            channelId:selectedChatData._id,
+                            fileUrl:response.data.filePath
+                        })
+                    }
                 }
             }
         }catch(err){
+            setIsUploading(false)
             console.log({err})
         }
     }

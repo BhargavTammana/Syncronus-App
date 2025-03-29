@@ -7,6 +7,7 @@ import authRoutes from './routes/AuthRoutes.js';
 import contactRoutes from './routes/ContactRoutes.js';
 import setupSocket from './socket.js';
 import messagesRoutes from './routes/MessagesRoutes.js';
+import channelRoutes from './routes/ChannelRoutes.js';
 dotenv.config();
 
 const app=express();
@@ -29,6 +30,7 @@ app.use(express.json())
 app.use('/api/auth',authRoutes)
 app.use('/api/contact',contactRoutes);
 app.use('/api/messages',messagesRoutes)
+app.use('/api/channel',channelRoutes)
 
 app.use((err, req, res, next) => {
     // Handle errors
