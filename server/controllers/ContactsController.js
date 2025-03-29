@@ -2,6 +2,7 @@ import expressAsyncHandler from "express-async-handler"
 import User from "../models/UserModel.js"
 import mongoose from "mongoose"
 import Message from "../models/MessagesModel.js"
+import Channel from "../models/ChannelModel.js"
 
 export const searchContacts = expressAsyncHandler(async(req,res,next)=>{
     const {searchTerm} = req.body
@@ -81,3 +82,4 @@ export const getAllContacts = expressAsyncHandler(async(req,res,next)=>{
     }))
     return res.status(200).json({contacts})
 })
+

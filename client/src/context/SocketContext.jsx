@@ -8,7 +8,14 @@ const SocketContext = createContext(null);
 export const SocketProvider = ({ children }) => {
   const socketRef = useRef(null);
   const [socket, setSocket] = useState(null);
-  const { userInfo, selectedChatData, selectedChatType, addMessage } = useAppStore();
+  const { 
+    userInfo, 
+    selectedChatData, 
+    selectedChatType, 
+    addMessage,
+    addChannelInChannelList,
+    addContactsInDMContacts  // Add this to destructuring
+  } = useAppStore();
 
   useEffect(() => {
     if (userInfo) {
@@ -28,12 +35,15 @@ export const SocketProvider = ({ children }) => {
         ) {
           addMessage(message);
         }
+        // Add this to update DM contacts list
+        addContactsInDMContacts(message);
       };
 
-      const handleReceiveChannelMessage = (message)=>{
-        if(selectedChatType !== undefined && selectedChatData._id === message.channelId){
-          addMessage(message)
+      const handleReceiveChannelMessage = (message) => {
+        if(selectedChatType !== undefined && selectedChatData._id === message.channelId) {
+          addMessage(message);
         }
+        addChannelInChannelList(message);
       }
 
       socketRef.current.on("receiveMessage", handleReceiveMessage);
@@ -46,7 +56,7 @@ export const SocketProvider = ({ children }) => {
         }
       };
     }
-  }, [userInfo, selectedChatData, selectedChatType, addMessage]);
+  }, [userInfo, selectedChatData, selectedChatType, addMessage, addChannelInChannelList, addContactsInDMContacts]); // Add to dependencies
 
   return <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>;
 };

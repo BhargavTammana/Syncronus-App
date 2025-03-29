@@ -29,10 +29,6 @@ const MessageBar = () => {
         }
     },[emojiRef])
 
-    useEffect(() => {
-        console.log("Socket in MessageBar:", !!socket);
-    }, [socket]);
-
     const handleAddEmoji =(emoji)=>{
         setMessage((msg)=>msg+emoji.emoji)
     }

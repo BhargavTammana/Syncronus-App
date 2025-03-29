@@ -61,5 +61,34 @@ export const createChatSlice = (set, get) => ({
         set((state) => ({
             selectedChatMessages: [...state.selectedChatMessages, newMessage]
         }));
+    },
+    addChannelInChannelList: (message) => {
+        const channels = get().channels;
+        const data = channels.find((channel) => channel._id === message.channelId);
+        if (data) {
+            const updatedChannels = channels.filter((channel) => channel._id !== message.channelId);
+            // Update the data with latest message if needed
+            data.lastMessage = message.content;
+            data.lastMessageTime = message.timeStamp;
+            // Set the new state with updated channels
+            set({ channels: [data, ...updatedChannels] });
+        }
+    },
+    addContactsInDMContacts: (message) => {
+        const contacts = get().directMessagesContacts;
+        // Find the contact that matches either sender or recipient
+        const data = contacts.find((contact) => 
+            contact._id === message.sender._id || contact._id === message.recipient._id
+        );
+        if (data) {
+            const updatedContacts = contacts.filter((contact) => 
+                contact._id !== message.sender._id && contact._id !== message.recipient._id
+            );
+            // Update the data with latest message
+            data.lastMessage = message.content;
+            data.lastMessageTime = message.timeStamp;
+            // Set the new state with updated contacts
+            set({ directMessagesContacts: [data, ...updatedContacts] });
+        }
     }
 });
