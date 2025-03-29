@@ -11,52 +11,42 @@ import channelRoutes from './routes/ChannelRoutes.js';
 import http from 'http';
 dotenv.config();
 
-const app=express();
-const port = process.env.PORT||3001;
-const databaseURL=process.env.DATABASE_URL;
+const app = express();
+const port = process.env.PORT || 3001;
+const databaseURL = process.env.DATABASE_URL;
 
-const corsOptions={
-    origin:process.env.ORIGIN,
-    methods:['GET','POST','PUT','PATCH','DELETE'],
-    credentials:true
+const corsOptions = {
+    origin: process.env.ORIGIN,
+    methods: ['GET','POST','PUT','PATCH','DELETE'],
+    credentials: true
 };
 
 app.use(cors(corsOptions))
-
-app.use("/uploads/profiles",express.static("uploads/profiles"))
-app.use("/uploads/files",express.static("uploads/files"))
+app.use("/uploads/profiles", express.static("uploads/profiles"))
+app.use("/uploads/files", express.static("uploads/files"))
 app.use(cookieParser())
 app.use(express.json())
 
-app.use('/api/auth',authRoutes)
-app.use('/api/contact',contactRoutes);
-app.use('/api/messages',messagesRoutes)
-app.use('/api/channel',channelRoutes)
+app.use('/api/auth', authRoutes)
+app.use('/api/contact', contactRoutes);
+app.use('/api/messages', messagesRoutes)
+app.use('/api/channel', channelRoutes)
 
 app.use((err, req, res, next) => {
-    // Handle errors
     console.error(err);
     res.status(500).send('Something went wrong!');
 });
 
 const server = http.createServer(app);
-console.log("\n=== SERVER STARTUP LOGS ===");
-console.log("HTTP Server created");
-console.log("ORIGIN:", process.env.ORIGIN);
-console.log("PORT:", port);
-
 const io = setupSocket(server);
-console.log("Socket server setup complete");
 
-server.listen(port,()=>{
-    console.log(`Server is running at http://localhost:${port}`)
-})
+server.listen(port);
 
 mongoose.connect(databaseURL)
     .then(()=>
     console.log("Database Connected Successfully"))
-    .catch(err=>console.log(err.message))
+    .catch(err=>console.error(err.message))
 
-    app.use((err, req, res, next) => {
-        res.status(500).json({ message: err.message });
-      });
+app.use((err, req, res, next) => {
+    res.status(500).json({ message: err.message });
+});

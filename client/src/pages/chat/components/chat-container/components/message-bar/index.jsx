@@ -16,7 +16,6 @@ const MessageBar = () => {
     const [emojiPickerOpen,setEmojiPickerOpen] = useState(false)
     const [message, setMessage] = useState("")
 
-
     useEffect(()=>{
         function handleClickOutside(event){
             if(emojiRef.current && !emojiRef.current.contains(event.target)){
@@ -37,25 +36,7 @@ const MessageBar = () => {
         if(message.trim() === "") return;
         
         if(selectedChatType === "channel"){
-            console.log("\n=== SENDING CHANNEL MESSAGE ===");
-            console.log("Socket ID:", socket.id);
-            console.log("Socket connected:", socket.connected);
-            console.log("Message:", {
-                channelId: selectedChatData._id,
-                sender: userInfo.id,
-                content: message,
-                messageType: "text"
-            });
-            
-            if (!socket) {
-                console.error("Socket is not initialized!");
-                return;
-            }
-            
-            if (!socket.connected) {
-                console.error("Socket is not connected!");
-                return;
-            }
+            if (!socket || !socket.connected) return;
             
             socket.emit("send-channel-message",{
                 channelId: selectedChatData._id,
@@ -63,7 +44,6 @@ const MessageBar = () => {
                 content: message,
                 messageType: "text"
             })
-            console.log("Message emitted successfully");
             setMessage("")
         }
         else if(selectedChatType === 'contact'){
@@ -74,19 +54,19 @@ const MessageBar = () => {
                 messageType:"text",
                 fileUrl:undefined
             })
-            setMessage(""); // Clear the message input after sending
+            setMessage("");
         }
     }
 
     const handleKeyPress = (e) => {
         if(e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault(); // Prevent new line
+            e.preventDefault();
             handleSendMessage();
         }
     }
 
     const handleAttachmentClick = ()=>{
-        if(fileInputRef.current ){
+        if(fileInputRef.current){
             fileInputRef.current.click()
         }
     }
