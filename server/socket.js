@@ -73,23 +73,27 @@ const setupSocket = (server)=>{
 
             await Channel.findByIdAndUpdate(channelId,{$push:{messages: createdMessage._id}})
 
-            const channel = await Channel.findById(channelId)
-            .populate("members")
+            const channel = await Channel.findById(channelId).populate("members")
             
             const finalData = {...messageData._doc,channelId:channel._id}
 
             if(channel && channel.members){
+                // Get admin socket ID once
+                const adminSocketId = userSocketMap.get(channel.admin._id.toString())
+                if(adminSocketId){
+                    io.to(adminSocketId).emit("receive-channel-message",finalData)
+                }
+                
+                // Send to members
                 channel.members.forEach(member=>{
+                    // Skip if member is admin to avoid duplicate messages
+                    if(member._id.toString() === channel.admin._id.toString()) return
+                    
                     const memberSocketId = userSocketMap.get(member._id.toString())
                     if(memberSocketId){
                         io.to(memberSocketId).emit("receive-channel-message",finalData)
                     }
-                    const adminSocketId = userSocketMap.get(channel.admin._id.toString())
-                    
                 })
-                if(adminSocketId){
-                    io.to(adminSocketId).emit("receive-channel-message",finalData)
-                }
             }
         
             

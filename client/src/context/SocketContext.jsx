@@ -31,7 +31,7 @@ export const SocketProvider = ({ children }) => {
       };
 
       const handleReceiveChannelMessage = (message)=>{
-        if(selectedChatType!=="undefined" && selectedChatData._id===message.channelId){
+        if(selectedChatType !== undefined && selectedChatData._id === message.channelId){
           addMessage(message)
         }
       }
