@@ -91,7 +91,7 @@ const setupSocket = (server)=>{
                     
                     const memberSocketId = userSocketMap.get(member._id.toString())
                     if(memberSocketId){
-                        io.to(memberSocketId).emit("receive-channel-message",finalData)
+                        io.to(memberSocketId).emit('receive-channel-message',finalData)
                     }
                 })
             }

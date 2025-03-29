@@ -133,12 +133,11 @@ const MessageContainer = () => {
   ), [selectedChatData._id]);
 
   const renderChannelMessages = (message)=>{
-    console.log(message.content)
     return (
     <div className={`mt-5 ${message.sender_id !== userInfo.id?"text-left":"text-right"}`}>
       {message.messageType ==="text" && (
         <div className={`${
-          message.sender._id === userInfo._id
+          message.sender._id !== userInfo._id
             ? "bg-[#8417ff]/5 text-[#8417ff]/90 border-[#8417ff]/50"
             : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"
         } border inline-block p-4 rounded my-1 max-w-[50%] break-words`}>
