@@ -57,44 +57,36 @@ const setupSocket = (server)=>{
 
     const sendChannelMessage = async(message)=>{
         try {
-            console.log("1. Received channel message:", message);
-            const {channelId, sender, content, messageType, fileUrl} = message
-            
-            console.log("2. Creating message with:", { sender, content, messageType });
+            const {channelId,sender,content,messageType,fileUrl} = message
             const createdMessage = await Message.create({
                 sender,
-                recipient: null,
+                recipient:null,
                 content,
                 messageType,
                 fileUrl,
-                timeStamp: new Date()
+                timeStamp:new Date()
             })
-            console.log("3. Created message:", createdMessage);
 
             const messageData = await Message.findById(createdMessage._id)
-                .populate("sender", "id email firstName lastName image color")
-                .exec()
-            console.log("4. Populated message data:", messageData);
+            .populate("sender","id email firstName lastName image color")
+            .exec()
+
+            await Channel.findByIdAndUpdate(channelId,{$push:{messages: createdMessage._id}})
 
             const channel = await Channel.findById(channelId)
-                .populate("members")
-            console.log("5. Found channel:", channel);
+            .populate("members")
             
-            const finalData = {...messageData._doc, channelId: channel._id}
-            console.log("6. Final data to send:", finalData);
-
-            await Channel.findByIdAndUpdate(channelId, {$push: {messages: createdMessage._id}})
+            const finalData = {...messageData._doc,channelId:channel._id}
 
             if(channel && channel.members){
                 channel.members.forEach(member=>{
-                    const memberSocketId = userSocketMap.get(member.id.toString())
-                    console.log("Member ID:", member.id, "Socket ID:", memberSocketId);
+                    const memberSocketId = userSocketMap.get(member._id.toString())
                     if(memberSocketId){
                         io.to(memberSocketId).emit("receive-channel-message",finalData)
                     }
+                    const adminSocketId = userSocketMap.get(channel.admin._id.toString())
+                    
                 })
-                const adminSocketId = userSocketMap.get(channel.admin)
-                console.log("Admin ID:", channel.admin, "Socket ID:", adminSocketId);
                 if(adminSocketId){
                     io.to(adminSocketId).emit("receive-channel-message",finalData)
                 }
@@ -104,7 +96,7 @@ const setupSocket = (server)=>{
             
             
         } catch (error) {
-            console.log("Error in sendChannelMessage:", error.message, error.stack)
+            console.log(error)
         }
     }
 

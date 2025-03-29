@@ -6,10 +6,7 @@ import React, { useEffect, useRef, useCallback, useState } from 'react'
 import {MdFolderZip} from 'react-icons/md'
 import {IoMdArrowRoundDown} from 'react-icons/io'
 import { IoCloseSharp } from 'react-icons/io5'
-import { useSocket } from '@/context/SocketContext'
-
 const MessageContainer = () => {
-  const socket = useSocket();
   const {selectedChatType, selectedChatData, userInfo, selectedChatMessages, setSelectedChatMessages,setIsUploading,setIsDownloading,setFileUploadProgress,setFileDownloadProgress} = useAppStore()
   const containerRef = useRef();
   const [showImage, setShowImage] = useState(false)
@@ -17,70 +14,35 @@ const MessageContainer = () => {
 
   const getMessages = useCallback(async () => {
     try {
-      if (!selectedChatData?._id) {
-        console.log("No selected chat data");
+      if (!selectedChatData?._id || selectedChatType !== "contact") {
         return;
       }
 
-      console.log("Fetching messages for:", selectedChatData._id);
       const response = await apiClient.post(
         GET_ALL_MESSAGES_ROUTE,
         { id: selectedChatData._id },
         { withCredentials: true }
       );
 
-      console.log("API Response:", response.data);
       if (response.data.messages) {
-        console.log("Setting messages:", response.data.messages);
         setSelectedChatMessages(response.data.messages);
       }
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
-  }, [selectedChatData?._id, setSelectedChatMessages]);
+  }, [selectedChatData?._id, selectedChatType, setSelectedChatMessages]);
 
   useEffect(() => {
-    if (selectedChatData?._id) {
+    if (selectedChatData?._id && selectedChatType === "contact") {
       getMessages();
     }
-  }, [selectedChatData?._id, getMessages]);
+  }, [selectedChatData?._id, selectedChatType, getMessages]);
 
   useEffect(() => {
     if (containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
   }, [selectedChatMessages]);
-
-  useEffect(() => {
-    if (selectedChatType === "channel" && socket) {
-        console.log("MessageContainer: Setting up channel message listener");
-        console.log("MessageContainer: Selected chat ID:", selectedChatData?._id);
-        
-        const handleChannelMessage = (message) => {
-            console.log("MessageContainer: Received channel message:", message);
-            console.log("MessageContainer: Message channelId:", message.channelId);
-            console.log("MessageContainer: Current selected chat ID:", selectedChatData?._id);
-            
-            if (selectedChatData?._id === message.channelId) {
-                console.log("MessageContainer: Message matches current channel, updating state");
-                setSelectedChatMessages(prev => {
-                    const newMessages = [...(prev || []), message];
-                    console.log("MessageContainer: Updated messages array:", newMessages);
-                    return newMessages;
-                });
-            } else {
-                console.log("MessageContainer: Message doesn't match current channel");
-            }
-        };
-
-        socket.on("receive-channel-message", handleChannelMessage);
-
-        return () => {
-            console.log("MessageContainer: Cleaning up channel message listener");
-            socket.off("receive-channel-message", handleChannelMessage);
-        };
-    }
-  }, [selectedChatType, socket, selectedChatData, setSelectedChatMessages]);
 
   const checkIfImage = (filePath)=>{
     const imageRegex=
@@ -90,24 +52,10 @@ const MessageContainer = () => {
 
   const renderMessages = useCallback(() => {
     let lastDate = null
-    console.log('Selected chat type:', selectedChatType);
-    console.log('Messages:', selectedChatMessages);
-    console.log('Selected chat data:', selectedChatData);
-    
     return selectedChatMessages.map((message,index) => {
-      console.log('Processing message in renderMessages:', message);
       const messageDate = moment(message.timeStamp).format("YYYY-MM-DD")
       const showDate = messageDate !== lastDate
       lastDate = messageDate
-      
-      let renderedMessage;
-      if(selectedChatType === "channel") {
-          console.log('Attempting to render channel message:', message);
-          renderedMessage = renderChannelMessages(message);
-      } else {
-          renderedMessage = renderDMMessages(message);
-      }
-      
       return (
         <div key={index}>
           {showDate && (
@@ -115,7 +63,8 @@ const MessageContainer = () => {
               {moment(message.timeStamp).format("LL")}
             </div>
           )}
-          {renderedMessage}
+          {selectedChatType === "contact" && renderDMMessages(message)}
+          {selectedChatType === "channel" && renderChannelMessages(message)}
         </div>
       )
     })
@@ -183,25 +132,22 @@ const MessageContainer = () => {
     </div>
   ), [selectedChatData._id]);
 
-  const renderChannelMessages = (message) => {
-    console.log('renderChannelMessages called with:', message);
+  const renderChannelMessages = (message)=>{
+    console.log(message.content)
     return (
-        <div className={`mt-5 ${message.sender === userInfo.id ? "text-right" : "text-left"}`}>
-            {message.messageType === "text" && (
-                <div className={`${
-                    message.sender === userInfo.id
-                        ? "bg-[#8417ff]/5 text-[#8417ff]/90 border-[#8417ff]/50"
-                        : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"
-                } border inline-block p-4 rounded my-1 max-w-[50%] break-words`}>
-                    {message.content}
-                    <div className="text-xs text-gray-600">
-                        {moment(message.timeStamp).format("LT")}
-                    </div>
-                </div>
-            )}
+    <div className={`mt-5 ${message.sender_id !== userInfo.id?"text-left":"text-right"}`}>
+      {message.messageType ==="text" && (
+        <div className={`${
+          message.sender._id === userInfo._id
+            ? "bg-[#8417ff]/5 text-[#8417ff]/90 border-[#8417ff]/50"
+            : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"
+        } border inline-block p-4 rounded my-1 max-w-[50%] break-words`}>
+          {message.content}
         </div>
-    );
-  };
+      )}
+    </div>
+    )
+  }
 
   return (
     <div 
