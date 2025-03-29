@@ -15,10 +15,20 @@ const app = express();
 const port = process.env.PORT || 3001;
 const databaseURL = process.env.DATABASE_URL;
 
+const allowedOrigins = [
+    'https://syncronus-app-frontend.onrender.com',
+    'http://localhost:5173' // for local development
+];
+
 const corsOptions = {
-    origin: "*",
-    methods: ['GET','POST','PUT','PATCH','DELETE'],
-    credentials: true
+    origin: function(origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        return callback(null, origin);
+    },
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    credentials: true,
+    optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions))
