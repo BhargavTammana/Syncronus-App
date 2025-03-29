@@ -31,7 +31,7 @@ const corsOptions = {
     optionsSuccessStatus: 200
 };
 
-app.use(cors(corsOptions))
+app.use(cors(corsOptions));
 app.use("/uploads/profiles", express.static("uploads/profiles"))
 app.use("/uploads/files", express.static("uploads/files"))
 app.use(cookieParser())
@@ -43,8 +43,11 @@ app.use('/api/messages', messagesRoutes)
 app.use('/api/channel', channelRoutes)
 
 app.use((err, req, res, next) => {
-    console.error(err);
-    res.status(500).send('Something went wrong!');
+    console.error(err.stack);
+    res.status(500).json({
+        error: 'Something went wrong!',
+        message: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
 });
 
 const server = http.createServer(app);
