@@ -9,21 +9,24 @@ import {IoPowerSharp} from "react-icons/io5"
 import { apiClient } from "@/lib/api-client"
 
 const ProfileInfo = () => {
-  const {userInfo,setUserInfo} = useAppStore()
+  const {userInfo, setUserInfo} = useAppStore()
   const navigate = useNavigate()
 
-  const logout = async()=>{
-    try{
-      const res = await apiClient.post(LOGOUT_ROUTE,{},{withCredentials:true})
+  const handleLogout = async() => {
+    try {
+      const { resetChatSlice } = useAppStore.getState()
+      const res = await apiClient.post(LOGOUT_ROUTE, {}, {withCredentials: true})
 
-      if(res.status===200){
+      if(res.status === 200) {
+        resetChatSlice() // Reset chat state before navigation
         navigate("/auth")
         setUserInfo(null)
       }
-    }catch(error){
+    } catch(error) {
       console.log(error)
     }
   }
+
   return (
     <div className="absolute bottom-0 h-16 flex items-center justify-between px-10 w-full bg-[#2a2b33]">
         <div className="flex gap-3 items-center justify-center">
@@ -68,7 +71,7 @@ const ProfileInfo = () => {
           <Tooltip>
             <TooltipTrigger>
               <IoPowerSharp className="text-red-500 text-xl font-medium"
-              onClick={logout}/>
+              onClick={handleLogout}/>
             </TooltipTrigger>
             <TooltipContent className="bg-[#1c1b1e] border-none text-white">
               Logout

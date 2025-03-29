@@ -24,22 +24,30 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { useAppStore } from "@/store"
 
 const NewDM = () => {
-  const {setSelectedChatType,setSelectedChatData}= useAppStore()
+  const {
+    setSelectedChatType,
+    setSelectedChatData,
+    setSelectedChatMessages
+  } = useAppStore()
   const [openNewContactModal, setOpenNewContactModal] = useState(false)
   const [searchedContacts, setSearchedContacts] = useState([])
-  const searchContacts = async (searchTerm)=>{
-    try{
-      if(searchTerm.length>0){
-        const response = await apiClient.post(SEARCH_CONTACT_ROUTES,{searchTerm},{withCredentials: true})
-        if(response.status === 200 && response.data.contacts){
-          setSearchedContacts(response.data.contacts)
+  const searchContacts = async (searchTerm) => {
+    try {
+        if(searchTerm.length > 0) {
+            const response = await apiClient.post(
+                SEARCH_CONTACT_ROUTES,
+                { searchTerm },
+                { withCredentials: true }
+            );
+            if(response.status === 200 && response.data.contacts) {
+                setSearchedContacts(response.data.contacts)
+            }
+        } else {
+            setSearchedContacts([])
         }
-
-     }else{
-      setSearchedContacts([])
-     }
-    }catch(e){
-      console.log({e})
+    } catch(error) {
+        setSearchedContacts([])
+        // Optionally add toast notification here
     }
   }
 
@@ -47,6 +55,7 @@ const NewDM = () => {
     setOpenNewContactModal(false)
     setSelectedChatType("contact");
     setSelectedChatData(contact)
+    setSelectedChatMessages([])
     setSearchedContacts([])
   }
 
