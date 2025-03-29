@@ -29,13 +29,48 @@ const MessageBar = () => {
         }
     },[emojiRef])
 
+    useEffect(() => {
+        console.log("Socket in MessageBar:", !!socket);
+    }, [socket]);
+
     const handleAddEmoji =(emoji)=>{
         setMessage((msg)=>msg+emoji.emoji)
     }
     
     const handleSendMessage = async()=>{
-        if(message.trim() === "") return; // Don't send empty messages
-        if(selectedChatType === 'contact'){
+        if(message.trim() === "") return;
+        
+        if(selectedChatType === "channel"){
+            console.log("\n=== SENDING CHANNEL MESSAGE ===");
+            console.log("Socket ID:", socket.id);
+            console.log("Socket connected:", socket.connected);
+            console.log("Message:", {
+                channelId: selectedChatData._id,
+                sender: userInfo.id,
+                content: message,
+                messageType: "text"
+            });
+            
+            if (!socket) {
+                console.error("Socket is not initialized!");
+                return;
+            }
+            
+            if (!socket.connected) {
+                console.error("Socket is not connected!");
+                return;
+            }
+            
+            socket.emit("send-channel-message",{
+                channelId: selectedChatData._id,
+                sender: userInfo.id,
+                content: message,
+                messageType: "text"
+            })
+            console.log("Message emitted successfully");
+            setMessage("")
+        }
+        else if(selectedChatType === 'contact'){
             socket.emit("sendMessage",{
                 sender:userInfo.id,
                 content:message,
@@ -44,16 +79,6 @@ const MessageBar = () => {
                 fileUrl:undefined
             })
             setMessage(""); // Clear the message input after sending
-        }
-        else if(selectedChatType === "channel"){
-            socket.emit("send-channel-message",{
-                sender:userInfo.id,
-                content:message,
-                messageType:"text",
-                fileUrl:undefined,
-                channelId:selectedChatData._id
-            })
-            setMessage("")
         }
     }
 

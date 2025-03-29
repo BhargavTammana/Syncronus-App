@@ -1,23 +1,24 @@
 import { useAppStore } from "@/store";
 import { HOST } from "@/utils/constants";
-import { createContext, useContext, useEffect, useRef } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 
 const SocketContext = createContext(null);
 
 export const SocketProvider = ({ children }) => {
-  const socket = useRef(null);
+  const socketRef = useRef(null);
+  const [socket, setSocket] = useState(null);
   const { userInfo, selectedChatData, selectedChatType, addMessage } = useAppStore();
 
   useEffect(() => {
     if (userInfo) {
-      socket.current = io(HOST, {
+      socketRef.current = io(HOST, {
         withCredentials: true,
         query: { userId: userInfo.id },
       });
 
-      socket.current.on("connect", () => {
-        console.log("Connected to socket server");
+      socketRef.current.on("connect", () => {
+        setSocket(socketRef.current);
       });
 
       const handleReceiveMessage = (message) => {
@@ -25,7 +26,6 @@ export const SocketProvider = ({ children }) => {
           selectedChatType !== undefined &&
           (selectedChatData._id === message.sender._id || selectedChatData._id === message.recipient._id)
         ) {
-          console.log("Received message", message);
           addMessage(message);
         }
       };
@@ -36,15 +36,19 @@ export const SocketProvider = ({ children }) => {
         }
       }
 
-      socket.current.on("receiveMessage", handleReceiveMessage);
-      socket.current.on("receive-channel-message",handleReceiveChannelMessage)
+      socketRef.current.on("receiveMessage", handleReceiveMessage);
+      socketRef.current.on("receive-channel-message", handleReceiveChannelMessage);
+
       return () => {
-        socket.current.disconnect();
+        if (socketRef.current) {
+          socketRef.current.disconnect();
+          setSocket(null);
+        }
       };
     }
   }, [userInfo, selectedChatData, selectedChatType, addMessage]);
 
-  return <SocketContext.Provider value={socket.current}>{children}</SocketContext.Provider>;
+  return <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>;
 };
 
 export const useSocket = () => useContext(SocketContext);

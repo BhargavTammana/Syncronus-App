@@ -8,6 +8,7 @@ import contactRoutes from './routes/ContactRoutes.js';
 import setupSocket from './socket.js';
 import messagesRoutes from './routes/MessagesRoutes.js';
 import channelRoutes from './routes/ChannelRoutes.js';
+import http from 'http';
 dotenv.config();
 
 const app=express();
@@ -37,11 +38,19 @@ app.use((err, req, res, next) => {
     console.error(err);
     res.status(500).send('Something went wrong!');
 });
-const server=app.listen(port,()=>{
+
+const server = http.createServer(app);
+console.log("\n=== SERVER STARTUP LOGS ===");
+console.log("HTTP Server created");
+console.log("ORIGIN:", process.env.ORIGIN);
+console.log("PORT:", port);
+
+const io = setupSocket(server);
+console.log("Socket server setup complete");
+
+server.listen(port,()=>{
     console.log(`Server is running at http://localhost:${port}`)
 })
-
-setupSocket(server)
 
 mongoose.connect(databaseURL)
     .then(()=>
