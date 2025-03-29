@@ -1,7 +1,7 @@
 import asyncHandler from 'express-async-handler'
 import jwt from 'jsonwebtoken'
 import User from '../models/UserModel.js'
-import { compare } from 'bcrypt';
+import { compare } from 'bcryptjs';
 import {renameSync,unlinkSync} from "fs"
 const maxAge= 3*24*60*60*1000;
 
