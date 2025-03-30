@@ -13,7 +13,7 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3001;
-const databaseURL = process.env.DATABASE_URL;
+const databaseURL = process.env.MONGODB_URL;
 
 const allowedOrigins = [
     'https://syncronus-app-frontend.onrender.com',
