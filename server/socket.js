@@ -4,7 +4,13 @@ import Channel from "./models/ChannelModel.js"
 const setupSocket = (server)=>{
     const io = new SocketIoServer(server,{
         cors:{
-            origin: process.env.ORIGIN,
+            origin: [
+                "https://syncronus-app-frontend.onrender.com",
+                "http://localhost:5173",
+                "http://localhost:5174",
+                "http://127.0.0.1:5173",
+                "http://127.0.0.1:5174"
+            ],
             methods:['GET','POST'],
             credentials:true
         }
