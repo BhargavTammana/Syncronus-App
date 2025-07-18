@@ -111,17 +111,20 @@ Chat-App/
 
 4. **Environment Setup**
 
-   Create a `.env` file in the server directory:
+   Create a `.env` file in the server directory (copy from `.env.example`):
    ```env
    PORT=3001
    MONGODB_URL=your_mongodb_connection_string
    JWT_KEY=your_jwt_secret_key
+   ORIGIN=["http://localhost:5173"]
    ```
 
-   Create a `.env.local` file in the client directory:
+   Create a `.env.local` file in the client directory (copy from `.env.example`):
    ```env
    VITE_SERVER_URL=http://localhost:3001
    ```
+
+   **⚠️ Important:** Never commit `.env` files to version control. The `.env.example` files are provided as templates.
 
 ### Running the Application
 
@@ -154,12 +157,15 @@ Chat-App/
 PORT=3001                              # Server port
 MONGODB_URL=your_mongodb_url           # MongoDB connection string
 JWT_KEY=your_secret_key               # JWT signing key
+ORIGIN=["http://localhost:5173"]       # Allowed CORS origins
 ```
 
 #### Client (.env.local)
 ```env
 VITE_SERVER_URL=http://localhost:3001  # Backend server URL
 ```
+
+**📁 Template Files:** Use `.env.example` files in both directories as templates for your environment setup.
 
 ## 📱 Usage
 
@@ -268,6 +274,22 @@ JWT_KEY=your_production_jwt_key
 # Client
 VITE_SERVER_URL=your_production_server_url
 ```
+
+## 🔒 Security
+
+### Environment Variables
+- **Never commit `.env` files** to version control
+- Use `.env.example` files as templates for required environment variables
+- Store sensitive data like JWT keys, database credentials securely
+- Use different JWT keys for development and production
+- Ensure MongoDB connection strings don't contain credentials in URLs
+
+### Best Practices
+- Use strong, unique JWT secret keys
+- Implement proper CORS configuration for production
+- Regularly update dependencies to patch security vulnerabilities
+- Use HTTPS in production environments
+- Implement rate limiting for API endpoints
 
 ## 🤝 Contributing
 
